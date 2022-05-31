@@ -18,13 +18,7 @@ public class ScoringService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScoringService.class);
 
     @Transactional
-    public boolean canTakeCredit(String clientName, Long amount) {
-        Long moneyAvailable = bankRepository.findAll().get(0).getAmount();
-        if (moneyAvailable < amount) {
-            LOGGER.info("We cannot give such a large amount of money.");
-            return false;
-        }
-
+    public boolean canTakeCredit(String clientName) {
         if (clientName.toLowerCase(Locale.ROOT).contains("stark")) {
             LOGGER.info(String
                     .format("We cannot give a credit to %s since he will not survive the winter", clientName));
@@ -35,5 +29,16 @@ public class ScoringService {
         int score = (int) (random.nextDouble() * 100);
         LOGGER.info(String.format("The client %s got the score of %d", clientName, score));
         return score > 50;
+    }
+
+    @Transactional
+    public boolean bankHasEnoughMoney(long amount) {
+        Long moneyAvailable = bankRepository.findAll().get(0).getAmount();
+        if (moneyAvailable < amount) {
+            LOGGER.info(String
+                    .format("The bank currently has %d money and someone expected %d", moneyAvailable, amount));
+            return false;
+        }
+        return true;
     }
 }
